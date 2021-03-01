@@ -1,4 +1,4 @@
- /*
+/*
  * MEGA DRIVE CLASSIC CONTROLLER firmware
  * by IODUM
  *
@@ -17,26 +17,25 @@ byte deviceID[6] = {0x00, 0x00, 0xA4, 0x20, 0x01, 0x01};
 
 // calibration data
 unsigned char cal_data[32] = {
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00
-};
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00};
 
 //************ Адреса ******************
-#define INIT1_REG 0xF0 // W / 0x55-начало иниц-и, 0xAA-включение кодир-я
-#define INIT2_REG 0xFB // W / 0x00
-#define ID_REG 0xFA // R
+#define INIT1_REG 0xF0        // W / 0x55-начало иниц-и, 0xAA-включение кодир-я
+#define INIT2_REG 0xFB        // W / 0x00
+#define ID_REG 0xFA           // R
 #define CONSOLE_TYPE_REG 0xFE // W / 0x03 для SNES, 0x01 для WII
-#define KEY1_REG 0x40 // W
-#define KEY2_REG 0x46 // W
-#define KEY3_REG 0x4C // W
-#define CONFIRM1_REG 0x20 // R
-#define CONFIRM2_REG 0x30 // R
+#define KEY1_REG 0x40         // W
+#define KEY2_REG 0x46         // W
+#define KEY3_REG 0x4C         // W
+#define CONFIRM1_REG 0x20     // R
+#define CONFIRM2_REG 0x30     // R
 #define READ_BUTTONS_REG 0x00 // R
 
 //********** Типы консолей deviceID[4] 0xFE ************
@@ -49,41 +48,46 @@ unsigned char cal_data[32] = {
 byte controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
 byte buttons_state[2] = {0xFF, 0xFF};
 
+// режим установки турбо кнопок
+bool config_mode = false;
+uint8_t config_push_time = 0;
+#define CONFIG_MODE_DELAY 4 //sec
+
 // порты подключения кнопок на плате type S/C
-#define BTN_MODE 14    //PC0
-#define BTN_UP 16      //PC2
-#define BTN_LEFT 17    //PC3
-#define BTN_RIGHT 0    //PD0
-#define BTN_DOWN 1     //PD1
-#define BTN_START 2    //PD2
-#define BTN_A 5        //PD5
-#define BTN_X 6        //PD6
-#define BTN_B 7        //PD7
-#define BTN_Y 8        //PB0
-#define BTN_C 9        //PB1
-#define BTN_Z 10       //PB2
+#define BTN_MODE 14 //PC0
+#define BTN_UP 16   //PC2
+#define BTN_LEFT 17 //PC3
+#define BTN_RIGHT 0 //PD0
+#define BTN_DOWN 1  //PD1
+#define BTN_START 2 //PD2
+#define BTN_A 5     //PD5
+#define BTN_X 6     //PD6
+#define BTN_B 7     //PD7
+#define BTN_Y 8     //PB0
+#define BTN_C 9     //PB1
+#define BTN_Z 10    //PB2
 
 // порты подключения пинов гейпада сеги (type L)
-#define UP_Z_BTN 3        //PD3
-#define DOWN_Y_BTN 4      //PD4
-#define LEFT_X_BTN 5      //PD5
-#define RIGHT_MODE_BTN 6  //PD6
-#define A_B_BTN 7         //PD7
-#define START_C_BTN 9     //PB1
-#define SELECT_PIN 8      //PB0
+#define UP_Z_BTN 3       //PD3
+#define DOWN_Y_BTN 4     //PD4
+#define LEFT_X_BTN 5     //PD5
+#define RIGHT_MODE_BTN 6 //PD6
+#define A_B_BTN 7        //PD7
+#define START_C_BTN 9    //PB1
+#define SELECT_PIN 8     //PB0
 // задержки для корректного чтения состояния кнопок
 #define SCAN_LOOP_DELAY 17
-#define SCAN_STEP_DELAY 10  //микросекунды
+#define SCAN_STEP_DELAY 10 //микросекунды
 
 // задержка между циклами чтения состояния кнопок
-#define BUTTONS_SCAN_DELAY 10 // миллисекунды 
-
+#define BUTTONS_SCAN_DELAY 10 // миллисекунды
 
 /***********************************************************
  * Инициализация геймпада
 ************************************************************/
-int gamepadInit(){
-  
+int gamepadInit()
+{
+
 //--- type S/C ---------------
 #ifndef TYPE_L
   pinMode(BTN_UP, INPUT_PULLUP);
@@ -109,18 +113,18 @@ int gamepadInit(){
   pinMode(A_B_BTN, INPUT);
   pinMode(SELECT_PIN, OUTPUT);
   pinMode(START_C_BTN, INPUT);
-  
+
   digitalWrite(SELECT_PIN, HIGH);
 #endif
-  
+
   return 0;
- 
 }
 
 /***********************************************************
  * Проверка контактов
 ************************************************************/
-void debugInit(){
+void debugInit()
+{
 #ifdef DEBUG
   pinMode(BTN_UP, OUTPUT);
   pinMode(BTN_DOWN, OUTPUT);
@@ -134,7 +138,7 @@ void debugInit(){
   pinMode(BTN_X, OUTPUT);
   pinMode(BTN_Y, OUTPUT);
   pinMode(BTN_Z, OUTPUT);
-  
+
   digitalWrite(BTN_UP, HIGH);
   digitalWrite(BTN_DOWN, HIGH);
   digitalWrite(BTN_LEFT, HIGH);
@@ -154,7 +158,8 @@ void debugInit(){
  * Чтение состояния выводов контроллера в буфер
  * Используется только для Type L
 ************************************************************/
-unsigned char controllerPortRead(){
+unsigned char controllerPortRead()
+{
   unsigned char res;
   res = PIND & 0xFC;
   res |= PINB & 0x02;
@@ -164,7 +169,8 @@ unsigned char controllerPortRead(){
 /***********************************************************
  * Опрос состояния кнопок
 ************************************************************/
-void pollController( byte* state_buf){
+void pollController(byte *state_buf)
+{
 
   //--- type S/C ---------------
 #ifndef TYPE_L
@@ -180,7 +186,7 @@ void pollController( byte* state_buf){
   state_buf[0] &= (PIND << 5) | B10111111;
   //if (!digitalRead(BTN_RIGHT)) state_b1 &= B01111111;
   state_buf[0] &= (PIND << 7) | B01111111;
-  
+
   //if (!digitalRead(BTN_UP)) state_b2 &= B11111110;
   //if (!digitalRead(BTN_LEFT)) state_b2 &= B11111101;
   state_buf[1] &= (PINC >> 2) | B11111100;
@@ -195,30 +201,34 @@ void pollController( byte* state_buf){
 
 //--- type L ---------------
 #ifdef TYPE_L
-   
-   unsigned char buf[3] = {0xff, 0xff, 0xff};
+
+  unsigned char buf[3] = {0xff, 0xff, 0xff};
   //buf[0]:  A /  x  / x  / x  / x / x / Start/ x
   //buf[1]:  B /Right/Left/Down/ Up/ x / C    / x
   //buf[2]:  x / Mode/ X  / Y  / Z / x / x    / x
-   
-   for (unsigned char i = 0; i <= 3; i++){
+
+  for (unsigned char i = 0; i <= 3; i++)
+  {
     digitalWrite(SELECT_PIN, LOW);
     delayMicroseconds(SCAN_STEP_DELAY);
-     
-    if (i == 1) buf[0] = controllerPortRead();
-     
+
+    if (i == 1)
+      buf[0] = controllerPortRead();
+
     digitalWrite(SELECT_PIN, HIGH);
     delayMicroseconds(SCAN_STEP_DELAY);
-    
-    if (i == 1) buf[1] = controllerPortRead();
-    if (i == 2) buf[2] = controllerPortRead();
-   }
- 
+
+    if (i == 1)
+      buf[1] = controllerPortRead();
+    if (i == 2)
+      buf[2] = controllerPortRead();
+  }
+
   if (!(buf[0] & (1 << 7)))
     state_buf[0] &= B11011111; // A
   if (!(buf[0] & (1 << 1)))
     state_buf[0] &= B11111011; // Start
-    
+
   if (!(buf[1] & (1 << 3)))
     state_buf[1] &= B11111110; // Up
   if (!(buf[1] & (1 << 4)))
@@ -231,7 +241,7 @@ void pollController( byte* state_buf){
     state_buf[1] &= B10111111; // B
   if (!(buf[1] & (1 << 1)))
     state_buf[1] &= B11101111; // C
-    
+
   if (!(buf[2] & (1 << 3)))
     state_buf[0] &= B11111101; // Z
   if (!(buf[2] & (1 << 4)))
@@ -240,17 +250,17 @@ void pollController( byte* state_buf){
     state_buf[0] &= B11011111; // X
   if (!(buf[2] & (1 << 6)))
     state_buf[0] &= B11101111; // Mode
- 
+
   delay(SCAN_LOOP_DELAY);
 #endif
-
 }
 
 /***********************************************************
  * Убирает дребезг кнопок
 ************************************************************/
-void buttonsScan(){
-  
+void buttonsScan()
+{
+
   byte state1[2] = {0xFF, 0xFF};
   byte state2[2] = {0xFF, 0xFF};
 
@@ -260,18 +270,19 @@ void buttonsScan(){
 
   buttons_state[0] = state1[0] | state2[0];
   buttons_state[1] = state1[1] | state2[1];
- 
 }
 
 /***********************************************************
  * Формирование ответа для консоли
 ************************************************************/
-void wiimoteQuery(){
+void wiimoteQuery()
+{
 
   wdt_reset();
 
-  if (wm_get_reg(CONSOLE_TYPE_REG) == WII_TYPE){ // data format
-    
+  if (wm_get_reg(CONSOLE_TYPE_REG) == WII_TYPE)
+  { // data format
+
     controller_report[0] = 0x5F;
     controller_report[1] = 0xDF;
     controller_report[2] = 0x8F;
@@ -280,9 +291,10 @@ void wiimoteQuery(){
     controller_report[5] = buttons_state[1];
     controller_report[6] = 0x00;
     controller_report[7] = 0x00;
-    
-  } else if (wm_get_reg(CONSOLE_TYPE_REG) == SNES_TYPE){ // data format
-    
+  }
+  else if (wm_get_reg(CONSOLE_TYPE_REG) == SNES_TYPE)
+  { // data format
+
     controller_report[0] = 0x7F;
     controller_report[1] = 0x7F;
     controller_report[2] = 0x7F;
@@ -291,17 +303,17 @@ void wiimoteQuery(){
     controller_report[5] = 0x00;
     controller_report[6] = buttons_state[0];
     controller_report[7] = buttons_state[1];
-    
-  } 
-  
-    wm_newaction(controller_report);
+  }
+
+  wm_newaction(controller_report);
 }
 
 /***********************************************************
  * MAIN
 ************************************************************/
-void setup() {
-  
+void setup()
+{
+
 #ifdef DEBUG
   debugInit();
 #endif
@@ -313,17 +325,39 @@ void setup() {
   wm_init(deviceID, cal_data, wiimoteQuery);
   wdt_enable(WDTO_2S); //enable watchdog
   wdt_reset();
-  
-#endif
 
+#endif
 }
 
-void loop() {
+void loop()
+{
 #ifndef DEBUG
-   
+
   buttonsScan();
-  
+
+  // выход из режима настройки турбо кнопок
+  if (buttons_state[0] == 0xF9 && buttons_state[1] == 0xFF && config_mode)
+  {
+    config_mode = false;
+  }
+
+  // вход в режим настройки настройки турбо кнопок
+  if (buttons_state[0] == 0xFB && buttons_state[1] == 0xF7 && !config_mode)
+  {
+    config_push_time++;
+
+    if (config_push_time > CONFIG_MODE_DELAY)
+    {
+      config_mode = true;
+    }
+    delay(1000);
+  }
+  else
+  {
+    config_push_time = 0;
+  }
+
   delay(BUTTONS_SCAN_DELAY);
-  
+
 #endif
 }
