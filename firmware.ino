@@ -291,6 +291,11 @@ void wiimoteQuery()
     controller_report[5] = buttons_state[1];
     controller_report[6] = 0x00;
     controller_report[7] = 0x00;
+    if (config_mode)
+    {
+      controller_report[4] = 0xFF;
+      controller_report[5] = 0xFF;
+    }
   }
   else if (wm_get_reg(CONSOLE_TYPE_REG) == SNES_TYPE)
   { // data format
@@ -303,12 +308,14 @@ void wiimoteQuery()
     controller_report[5] = 0x00;
     controller_report[6] = buttons_state[0];
     controller_report[7] = buttons_state[1];
+    if (config_mode)
+    {
+      controller_report[6] = 0xFF;
+      controller_report[7] = 0xFF;
+    }
   }
 
-  if (!config_mode)
-  {
     wm_newaction(controller_report);
-  }
 }
 
 /***********************************************************
