@@ -263,7 +263,7 @@ void buttonsScan()
 
   byte state1[2] = {0xFF, 0xFF};
   byte state2[2] = {0xFF, 0xFF};
-
+  
   pollController(state1);
   delayMicroseconds(3);
   pollController(state2);
