@@ -263,7 +263,7 @@ void buttonsScan()
 
   byte state1[2] = {0xFF, 0xFF};
   byte state2[2] = {0xFF, 0xFF};
-  
+
   pollController(state1);
   delayMicroseconds(3);
   pollController(state2);
@@ -305,7 +305,10 @@ void wiimoteQuery()
     controller_report[7] = buttons_state[1];
   }
 
-  wm_newaction(controller_report);
+  if (!config_mode)
+  {
+    wm_newaction(controller_report);
+  }
 }
 
 /***********************************************************
