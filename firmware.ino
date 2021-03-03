@@ -47,11 +47,20 @@ unsigned char cal_data[32] = {
 //byte buttons_state_wii[6] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF};
 byte controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
 byte buttons_state[2] = {0xFF, 0xFF};
+byte turbo_state[2] = {0xFF, 0xFF};
 
 // режим установки турбо кнопок
 bool config_mode = false;
 uint8_t config_push_time = 0;
 #define CONFIG_MODE_DELAY 4 //sec
+
+// состояния кнопок для переключения режимов
+#define ENTER_CONFIG_0 0xF9
+#define ENTER_CONFIG_1 0xFF
+#define RESET_CONFIG_0 0xEF
+#define RESET_CONFIG_1 0xFF
+#define EXIT_CONFIG_0 0xFB
+#define EXIT_CONFIG_1 0xF7
 
 // порты подключения кнопок на плате type S/C
 #define BTN_MODE 14 //PC0
@@ -315,7 +324,7 @@ void wiimoteQuery()
     }
   }
 
-    wm_newaction(controller_report);
+  wm_newaction(controller_report);
 }
 
 /***********************************************************
@@ -345,26 +354,41 @@ void loop()
 
   buttonsScan();
 
-  // выход из режима настройки турбо кнопок
-  if (buttons_state[0] == 0xF9 && buttons_state[1] == 0xFF && config_mode)
+  // настройка турбо кнопок
+  if (config_mode)
   {
-    config_mode = false;
-  }
+    turbo_state[0] = turbo_state[0] | buttons_state[0] | 0xDD;
+    turbo_state[1] = turbo_state[1] | buttons_state[1] | 0x84;
 
-  // вход в режим настройки настройки турбо кнопок
-  if (buttons_state[0] == 0xFB && buttons_state[1] == 0xF7 && !config_mode)
-  {
-    config_push_time++;
-
-    if (config_push_time > CONFIG_MODE_DELAY)
+    // сброс настроек турбо кнопок
+    if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
     {
-      config_mode = true;
+      turbo_state[0] = 0xFF;
+      turbo_state[1] = 0xFF;
     }
-    delay(1000);
+    // выход из режима настройки турбо кнопок
+    if (buttons_state[0] == EXIT_CONFIG_0 && buttons_state[1] == EXIT_CONFIG_1)
+    {
+      config_mode = false;
+    }
   }
   else
   {
-    config_push_time = 0;
+    // вход в режим настройки турбо кнопок
+    if (buttons_state[0] == ENTER_CONFIG_0 && buttons_state[1] == ENTER_CONFIG_1)
+    {
+      config_push_time++;
+
+      if (config_push_time > CONFIG_MODE_DELAY)
+      {
+        config_mode = true;
+      }
+      delay(1000);
+    }
+    else
+    {
+      config_push_time = 0;
+    }
   }
 
   delay(BUTTONS_SCAN_DELAY);
