@@ -93,6 +93,9 @@ unsigned long last_turbo_push = 0;
 // задержка между циклами чтения состояния кнопок
 #define BUTTONS_SCAN_DELAY 10 // миллисекунды
 
+// задержка для устранения дребезга кнопок
+#define DEBOUNCE_DELAY 3 //микросекунды
+
 /***********************************************************
  * Инициализация геймпада
 ************************************************************/
@@ -276,7 +279,7 @@ void buttonsScan()
   byte state2[2] = {0xFF, 0xFF};
 
   pollController(state1);
-  delayMicroseconds(3);
+  delayMicroseconds(DEBOUNCE_DELAY);
   pollController(state2);
 
   buttons_state[0] = state1[0] | state2[0];
