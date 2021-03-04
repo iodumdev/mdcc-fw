@@ -47,12 +47,14 @@ unsigned char cal_data[32] = {
 //byte buttons_state_wii[6] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF};
 byte controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
 byte buttons_state[2] = {0xFF, 0xFF};
-byte turbo_state[2] = {0xFF, 0xFF};
+byte turbo_mask[2] = {0xFF, 0xFF};
 
 // режим установки турбо кнопок
 bool config_mode = false;
 uint8_t config_push_time = 0;
 #define CONFIG_MODE_DELAY 4 //sec
+unsigned long last_turbo_push = 0;
+#define TURBO_INTERVAL 67 // msec
 
 // состояния кнопок для переключения режимов
 #define ENTER_CONFIG_0 0xF9
@@ -288,40 +290,43 @@ void wiimoteQuery()
 {
 
   wdt_reset();
+  byte state[2] = {0xFF, 0xFF};
+
+  if (!config_mode)
+  {
+    state[0] = buttons_state[0];
+    state[1] = buttons_state[1];
+
+    if (millis() - last_turbo_push >= TURBO_INTERVAL)
+    {
+      state[0] &= !turbo_mask[0];
+      state[1] &= !turbo_mask[1];
+
+      last_turbo_push = millis();
+    }
+  }
 
   if (wm_get_reg(CONSOLE_TYPE_REG) == WII_TYPE)
   { // data format
-
     controller_report[0] = 0x5F;
     controller_report[1] = 0xDF;
     controller_report[2] = 0x8F;
     controller_report[3] = 0x00;
-    controller_report[4] = buttons_state[0];
-    controller_report[5] = buttons_state[1];
+    controller_report[4] = state[0];
+    controller_report[5] = state[1];
     controller_report[6] = 0x00;
     controller_report[7] = 0x00;
-    if (config_mode)
-    {
-      controller_report[4] = 0xFF;
-      controller_report[5] = 0xFF;
-    }
   }
   else if (wm_get_reg(CONSOLE_TYPE_REG) == SNES_TYPE)
   { // data format
-
     controller_report[0] = 0x7F;
     controller_report[1] = 0x7F;
     controller_report[2] = 0x7F;
     controller_report[3] = 0x7F;
     controller_report[4] = 0x00;
     controller_report[5] = 0x00;
-    controller_report[6] = buttons_state[0];
-    controller_report[7] = buttons_state[1];
-    if (config_mode)
-    {
-      controller_report[6] = 0xFF;
-      controller_report[7] = 0xFF;
-    }
+    controller_report[6] = state[0];
+    controller_report[7] = state[1];
   }
 
   wm_newaction(controller_report);
@@ -357,14 +362,14 @@ void loop()
   // настройка турбо кнопок
   if (config_mode)
   {
-    turbo_state[0] = turbo_state[0] | buttons_state[0] | 0xDD;
-    turbo_state[1] = turbo_state[1] | buttons_state[1] | 0x84;
+    turbo_mask[0] = turbo_mask[0] | buttons_state[0] | 0xDD;
+    turbo_mask[1] = turbo_mask[1] | buttons_state[1] | 0x84;
 
     // сброс настроек турбо кнопок
     if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
     {
-      turbo_state[0] = 0xFF;
-      turbo_state[1] = 0xFF;
+      turbo_mask[0] = 0xFF;
+      turbo_mask[1] = 0xFF;
     }
     // выход из режима настройки турбо кнопок
     if (buttons_state[0] == EXIT_CONFIG_0 && buttons_state[1] == EXIT_CONFIG_1)
