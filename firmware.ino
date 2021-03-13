@@ -9,22 +9,8 @@
 //#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
 //#define DEBUG
 
-#include <wiimoteext.h>
+#include <WMExtention.h>
 #include <avr/wdt.h>
-
-// ID classic controller
-byte deviceID[6] = {0x00, 0x00, 0xA4, 0x20, 0x01, 0x01};
-
-// calibration data
-unsigned char cal_data[32] = {
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00};
 
 //************ Адреса ******************
 #define INIT1_REG 0xF0        // W / 0x55-начало иниц-и, 0xAA-включение кодир-я
@@ -309,7 +295,7 @@ void wiimoteQuery()
     }
   }
 
-  if (wm_get_reg(CONSOLE_TYPE_REG) == WII_TYPE)
+  if (WME.getReg(CONSOLE_TYPE_REG) == WII_TYPE)
   { // data format
     controller_report[0] = 0x5F;
     controller_report[1] = 0xDF;
@@ -320,7 +306,7 @@ void wiimoteQuery()
     controller_report[6] = 0x00;
     controller_report[7] = 0x00;
   }
-  else if (wm_get_reg(CONSOLE_TYPE_REG) == SNES_TYPE)
+  else if (WME.getReg(CONSOLE_TYPE_REG) == SNES_TYPE)
   { // data format
     controller_report[0] = 0x7F;
     controller_report[1] = 0x7F;
@@ -332,7 +318,7 @@ void wiimoteQuery()
     controller_report[7] = state[1];
   }
 
-  wm_newaction(controller_report);
+  WME.newAction(controller_report);
 }
 
 /***********************************************************
@@ -349,7 +335,7 @@ void setup()
 
   wdt_disable(); // disable watchdog reset
   gamepadInit();
-  wm_init(deviceID, cal_data, wiimoteQuery);
+  WME.init(wiimoteQuery);
   wdt_enable(WDTO_2S); //enable watchdog
   wdt_reset();
 
