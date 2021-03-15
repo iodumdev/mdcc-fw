@@ -49,6 +49,8 @@ unsigned long last_turbo_push = 0;
 #define RESET_CONFIG_1 0xFF
 #define EXIT_CONFIG_0 0xFB
 #define EXIT_CONFIG_1 0xF7
+#define nADD_TURBO_1 0x01
+#define nREMOVE_TURBO_0 0x40
 
 // порты подключения кнопок на плате type S/C
 #define BTN_MODE 14 //PC0
@@ -351,8 +353,15 @@ void loop()
   // настройка турбо кнопок
   if (config_mode)
   {
-    turbo_mask[0] = turbo_mask[0] | buttons_state[0] | 0xDD;
-    turbo_mask[1] = turbo_mask[1] | buttons_state[1] | 0x84;
+    if (!(buttons_state[1] & nADD_TURBO_1))
+    {
+      turbo_mask[0] = turbo_mask[0] | buttons_state[0] | 0xDD;
+      turbo_mask[1] = turbo_mask[1] | buttons_state[1] | 0x84;
+    }
+    else if(!(buttons_state[0] & nREMOVE_TURBO_0))
+    {
+      /// REMOVE BITS FROM turbo_mask
+    }
 
     // сброс настроек турбо кнопок
     if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
