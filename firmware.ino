@@ -13,16 +13,7 @@
 #include <avr/wdt.h>
 
 //************ Адреса ******************
-#define INIT1_REG 0xF0        // W / 0x55-начало иниц-и, 0xAA-включение кодир-я
-#define INIT2_REG 0xFB        // W / 0x00
-#define ID_REG 0xFA           // R
 #define CONSOLE_TYPE_REG 0xFE // W / 0x03 для SNES, 0x01 для WII
-#define KEY1_REG 0x40         // W
-#define KEY2_REG 0x46         // W
-#define KEY3_REG 0x4C         // W
-#define CONFIRM1_REG 0x20     // R
-#define CONFIRM2_REG 0x30     // R
-#define READ_BUTTONS_REG 0x00 // R
 
 //********** Типы консолей deviceID[4] 0xFE ************
 #define WII_TYPE 0x01
@@ -290,8 +281,8 @@ void wiimoteQuery()
 
     if (millis() - last_turbo_push >= TURBO_INTERVAL)
     {
-      state[0] &= !turbo_mask[0];
-      state[1] &= !turbo_mask[1];
+      state[0] |= turbo_mask[0];
+      state[1] |= turbo_mask[1];
 
       last_turbo_push = millis();
     }
@@ -355,12 +346,15 @@ void loop()
   {
     if (!(buttons_state[1] & nADD_TURBO_1))
     {
-      turbo_mask[0] = turbo_mask[0] | buttons_state[0] | 0xDD;
-      turbo_mask[1] = turbo_mask[1] | buttons_state[1] | 0x84;
+      // добавление турбо
+      turbo_mask[0] &= 0x22 & !(buttons_state[0]);
+      turbo_mask[1] &= 0x7B & !(buttons_state[1]);
     }
     else if(!(buttons_state[0] & nREMOVE_TURBO_0))
     {
-      /// REMOVE BITS FROM turbo_mask
+      // удаление турбо
+      turbo_mask[0] |= 0xDD | buttons_state[0];
+      turbo_mask[1] |= 0x84 | buttons_state[1];
     }
 
     // сброс настроек турбо кнопок
