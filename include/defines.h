@@ -1,3 +1,13 @@
+/*
+ * MEGA DRIVE CLASSIC CONTROLLER firmware
+ * 
+ * 
+ * by IODUM
+ * 
+ * version 1.1.2
+ *
+*/
+
 //************ Адреса ******************
 #define CONSOLE_TYPE_REG 0xFE // W / 0x03 для SNES, 0x01 для WII
 
@@ -6,16 +16,16 @@
 #define SNES_TYPE 0x03
 
 // режим установки турбо кнопок
-#define CONFIG_MODE_DELAY 4 //sec
+#define CONFIG_MODE_DELAY 4 //sec;
 #define TURBO_INTERVAL 67 // msec
 
 // состояния кнопок для переключения режимов
-#define ENTER_CONFIG_0 0xF9
-#define ENTER_CONFIG_1 0xFF
-#define RESET_CONFIG_0 0xEF
+#define ENTER_CONFIG_0 0xED
+#define ENTER_CONFIG_1 0xEF
+#define RESET_CONFIG_0 0xAF
 #define RESET_CONFIG_1 0xFF
 #define EXIT_CONFIG_0 0xFB
-#define EXIT_CONFIG_1 0xF7
+#define EXIT_CONFIG_1 0xFF
 #define nADD_TURBO_1 0x01
 #define nREMOVE_TURBO_0 0x40
 
@@ -46,7 +56,7 @@
 #define SCAN_STEP_DELAY 10 //микросекунды
 
 // задержка между циклами чтения состояния кнопок
-#define BUTTONS_SCAN_DELAY 10 // миллисекунды
+#define BUTTONS_SCAN_DELAY 2 // миллисекунды
 
 // задержка для устранения дребезга кнопок
 #define DEBOUNCE_DELAY 3 //микросекунды

@@ -1,17 +1,21 @@
 /*
  * MEGA DRIVE CLASSIC CONTROLLER firmware
+ * 
+ * 
  * by IODUM
- *
+ * 
  * version 1.1.2
  *
 */
+
+#include <Arduino.h>
 
 //#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
 //#define DEBUG
 
 #include <WMExtention.h>
 #include <avr/wdt.h>
-#include "defines.h"
+#include <defines.h>
 
 // состояние кнопок
 //byte buttons_state_mini[8] = {0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0xFF, 0xFF};
@@ -239,7 +243,7 @@ void wiimoteQuery()
   }
 
   if (WME.getReg(CONSOLE_TYPE_REG) == WII_TYPE)
-  { // data format
+  { // Wii data format
     controller_report[0] = 0x5F;
     controller_report[1] = 0xDF;
     controller_report[2] = 0x8F;
@@ -250,7 +254,7 @@ void wiimoteQuery()
     controller_report[7] = 0x00;
   }
   else if (WME.getReg(CONSOLE_TYPE_REG) == SNES_TYPE)
-  { // data format
+  { // NES/SNES data format
     controller_report[0] = 0x7F;
     controller_report[1] = 0x7F;
     controller_report[2] = 0x7F;
@@ -297,21 +301,21 @@ void loop()
     if (!(buttons_state[1] & nADD_TURBO_1))
     {
       // добавление турбо
-      turbo_mask[0] &= 0x22 & !(buttons_state[0]);
-      turbo_mask[1] &= 0x7B & !(buttons_state[1]);
+      turbo_mask[0] |= 0x22 & ~(buttons_state[0]);
+      turbo_mask[1] |= 0x78 & ~(buttons_state[1]);
     }
     else if(!(buttons_state[0] & nREMOVE_TURBO_0))
     {
       // удаление турбо
-      turbo_mask[0] |= 0xDD | buttons_state[0];
-      turbo_mask[1] |= 0x84 | buttons_state[1];
+      turbo_mask[0] &= 0x22 & buttons_state[0];
+      turbo_mask[1] &= 0x78 & buttons_state[1];
     }
 
     // сброс настроек турбо кнопок
     if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
     {
-      turbo_mask[0] = 0xFF;
-      turbo_mask[1] = 0xFF;
+      turbo_mask[0] = 0x00;
+      turbo_mask[1] = 0x00;
     }
     // выход из режима настройки турбо кнопок
     if (buttons_state[0] == EXIT_CONFIG_0 && buttons_state[1] == EXIT_CONFIG_1)

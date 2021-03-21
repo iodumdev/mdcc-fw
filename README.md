@@ -1,5 +1,5 @@
-<h1>MD Classic Controller firmware</h1>
+# MD Classic Controller firmware #
 
-v1.1.2:<br>
-	- Add watchdog<br>
-	- Edit responsing algorithm
+v1.1.2:
+- Add watchdog
+- Edit responsing algorithm
