@@ -51,12 +51,13 @@
 #define A_B_BTN 7        //PD7
 #define START_C_BTN 9    //PB1
 #define SELECT_PIN 8     //PB0
-// задержки для корректного чтения состояния кнопок
-#define SCAN_LOOP_DELAY 17
-#define SCAN_STEP_DELAY 10 //микросекунды
+
+// задержки для корректного чтения состояния кнопок (type L)
+#define SCAN_LOOP_DELAY_ms 17
+#define SCAN_STEP_DELAY_us 10 //микросекунды
 
 // задержка между циклами чтения состояния кнопок
-#define BUTTONS_SCAN_DELAY 2 // миллисекунды
+#define BUTTONS_SCAN_DELAY_ms 2 // миллисекунды
 
 // задержка для устранения дребезга кнопок
-#define DEBOUNCE_DELAY 3 //микросекунды
+#define DEBOUNCE_DELAY_us 3 //микросекунды

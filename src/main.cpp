@@ -11,7 +11,6 @@
 #include <Arduino.h>
 
 //#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
-//#define DEBUG
 
 #include <WMExtention.h>
 #include <avr/wdt.h>
@@ -37,6 +36,13 @@ int gamepadInit()
 
 //--- type S/C ---------------
 #ifndef TYPE_L
+  DDRB &= 0b11111000;
+  PORTB |= 0b00000111;
+  DDRC &= 0b11110010;
+  PORTC |= 0b00001101;
+  DDRD &= 0b00011000;
+  PORTD |= 0b1100111;
+  /*
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
   pinMode(BTN_LEFT, INPUT_PULLUP);
@@ -49,56 +55,31 @@ int gamepadInit()
   pinMode(BTN_X, INPUT_PULLUP);
   pinMode(BTN_Y, INPUT_PULLUP);
   pinMode(BTN_Z, INPUT_PULLUP);
+  */
 #endif
 
 //--- type L ---------------
 #ifdef TYPE_L
+
+  DDRD &= 0b00000111;
+  DDRB |= 0b00000001;
+  DDRB &= 0b11111101;
+  PORTB |= _BV(PB0);
+
+/*
   pinMode(UP_Z_BTN, INPUT);
   pinMode(DOWN_Y_BTN, INPUT);
   pinMode(LEFT_X_BTN, INPUT);
   pinMode(RIGHT_MODE_BTN, INPUT);
   pinMode(A_B_BTN, INPUT);
-  pinMode(SELECT_PIN, OUTPUT);
   pinMode(START_C_BTN, INPUT);
+  pinMode(SELECT_PIN, OUTPUT);
 
   digitalWrite(SELECT_PIN, HIGH);
+*/
 #endif
 
   return 0;
-}
-
-/***********************************************************
- * Проверка контактов
-************************************************************/
-void debugInit()
-{
-#ifdef DEBUG
-  pinMode(BTN_UP, OUTPUT);
-  pinMode(BTN_DOWN, OUTPUT);
-  pinMode(BTN_LEFT, OUTPUT);
-  pinMode(BTN_RIGHT, OUTPUT);
-  pinMode(BTN_START, OUTPUT);
-  pinMode(BTN_MODE, OUTPUT);
-  pinMode(BTN_A, OUTPUT);
-  pinMode(BTN_B, OUTPUT);
-  pinMode(BTN_C, OUTPUT);
-  pinMode(BTN_X, OUTPUT);
-  pinMode(BTN_Y, OUTPUT);
-  pinMode(BTN_Z, OUTPUT);
-
-  digitalWrite(BTN_UP, HIGH);
-  digitalWrite(BTN_DOWN, HIGH);
-  digitalWrite(BTN_LEFT, HIGH);
-  digitalWrite(BTN_RIGHT, HIGH);
-  digitalWrite(BTN_START, HIGH);
-  digitalWrite(BTN_MODE, HIGH);
-  digitalWrite(BTN_A, HIGH);
-  digitalWrite(BTN_B, HIGH);
-  digitalWrite(BTN_C, HIGH);
-  digitalWrite(BTN_X, HIGH);
-  digitalWrite(BTN_Y, HIGH);
-  digitalWrite(BTN_Z, HIGH);
-#endif
 }
 
 /***********************************************************
@@ -156,14 +137,18 @@ void pollController(byte *state_buf)
 
   for (unsigned char i = 0; i <= 3; i++)
   {
-    digitalWrite(SELECT_PIN, LOW);
-    delayMicroseconds(SCAN_STEP_DELAY);
+    PORTB &= ~_BV(PB0);
+    _delay_us(SCAN_STEP_DELAY_us);
+    //digitalWrite(SELECT_PIN, LOW);
+    //delayMicroseconds(SCAN_STEP_DELAY);
 
     if (i == 1)
       buf[0] = controllerPortRead();
 
-    digitalWrite(SELECT_PIN, HIGH);
-    delayMicroseconds(SCAN_STEP_DELAY);
+    PORTB |= _BV(PB0);
+    _delay_us(SCAN_STEP_DELAY_us);
+    //digitalWrite(SELECT_PIN, HIGH);
+    //delayMicroseconds(SCAN_STEP_DELAY);
 
     if (i == 1)
       buf[1] = controllerPortRead();
@@ -198,7 +183,7 @@ void pollController(byte *state_buf)
   if (!(buf[2] & (1 << 6)))
     state_buf[0] &= B11101111; // Mode
 
-  delay(SCAN_LOOP_DELAY);
+  _delay_ms(SCAN_LOOP_DELAY_ms);
 #endif
 }
 
@@ -212,7 +197,7 @@ void buttonsScan()
   byte state2[2] = {0xFF, 0xFF};
 
   pollController(state1);
-  delayMicroseconds(DEBOUNCE_DELAY);
+  _delay_us(DEBOUNCE_DELAY_us);
   pollController(state2);
 
   buttons_state[0] = state1[0] | state2[0];
@@ -274,24 +259,15 @@ void wiimoteQuery()
 void setup()
 {
 
-#ifdef DEBUG
-  debugInit();
-#endif
-
-#ifndef DEBUG
-
   wdt_disable(); // disable watchdog reset
   gamepadInit();
   WME.init(wiimoteQuery);
   wdt_enable(WDTO_2S); //enable watchdog
   wdt_reset();
-
-#endif
 }
 
 void loop()
 {
-#ifndef DEBUG
 
   buttonsScan();
 
@@ -304,7 +280,7 @@ void loop()
       turbo_mask[0] |= 0x22 & ~(buttons_state[0]);
       turbo_mask[1] |= 0x78 & ~(buttons_state[1]);
     }
-    else if(!(buttons_state[0] & nREMOVE_TURBO_0))
+    else if (!(buttons_state[0] & nREMOVE_TURBO_0))
     {
       // удаление турбо
       turbo_mask[0] &= 0x22 & buttons_state[0];
@@ -334,7 +310,7 @@ void loop()
       {
         config_mode = true;
       }
-      delay(1000);
+      _delay_ms(1000);
     }
     else
     {
@@ -342,7 +318,5 @@ void loop()
     }
   }
 
-  delay(BUTTONS_SCAN_DELAY);
-
-#endif
+  _delay_ms(BUTTONS_SCAN_DELAY_ms);
 }
