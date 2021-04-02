@@ -8,7 +8,11 @@
  *
 */
 
-#include <Arduino.h>
+
+//#include <Arduino.h> // используется только функция millis()
+extern "C" {
+#include <millis.h>
+}
 
 //#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
 
@@ -19,9 +23,9 @@
 // состояние кнопок
 //byte buttons_state_mini[8] = {0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0xFF, 0xFF};
 //byte buttons_state_wii[6] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF};
-byte controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
-byte buttons_state[2] = {0xFF, 0xFF};
-byte turbo_mask[2] = {0x00, 0x00};
+uint8_t controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
+uint8_t buttons_state[2] = {0xFF, 0xFF};
+uint8_t turbo_mask[2] = {0x00, 0x00};
 
 // режим установки турбо кнопок
 bool config_mode = false;
@@ -97,34 +101,34 @@ unsigned char controllerPortRead()
 /***********************************************************
  * Опрос состояния кнопок
 ************************************************************/
-void pollController(byte *state_buf)
+void pollController(uint8_t *state_buf)
 {
 
   //--- type S/C ---------------
 #ifndef TYPE_L
   //if (!digitalRead(BTN_Z)) state_b1 &= B11111101;
-  state_buf[0] &= (PINB >> 1) | B11111101;
+  state_buf[0] &= (PINB >> 1) | 0b11111101;
   //if (!digitalRead(BTN_START)) state_b1 &= B11111011;
-  state_buf[0] &= PIND | B11111011;
+  state_buf[0] &= PIND | 0b11111011;
   //if (!digitalRead(BTN_MODE)) state_b1 &= B11101111;
-  state_buf[0] &= (PINC << 4) | B11101111;
+  state_buf[0] &= (PINC << 4) | 0b11101111;
   //if (!digitalRead(BTN_X)) state_b1 &= B11011111;
-  state_buf[0] &= (PIND >> 1) | B11011111;
+  state_buf[0] &= (PIND >> 1) | 0b11011111;
   //if (!digitalRead(BTN_DOWN)) state_b1 &= B10111111;
-  state_buf[0] &= (PIND << 5) | B10111111;
+  state_buf[0] &= (PIND << 5) | 0b10111111;
   //if (!digitalRead(BTN_RIGHT)) state_b1 &= B01111111;
-  state_buf[0] &= (PIND << 7) | B01111111;
+  state_buf[0] &= (PIND << 7) | 0b01111111;
 
   //if (!digitalRead(BTN_UP)) state_b2 &= B11111110;
   //if (!digitalRead(BTN_LEFT)) state_b2 &= B11111101;
-  state_buf[1] &= (PINC >> 2) | B11111100;
+  state_buf[1] &= (PINC >> 2) | 0b11111100;
   //if (!digitalRead(BTN_Y)) state_b2 &= B11110111;
   //if (!digitalRead(BTN_C)) state_b2 &= B11101111;
-  state_buf[1] &= (PINB << 3) | B11100111;
+  state_buf[1] &= (PINB << 3) | 0b11100111;
   //if (!digitalRead(BTN_A)) state_b2 &= B11011111;
-  state_buf[1] &= PIND | B11011111;
+  state_buf[1] &= PIND | 0b11011111;
   //if (!digitalRead(BTN_B)) state_b2 &= B10111111;
-  state_buf[1] &= (PIND >> 1) | B10111111;
+  state_buf[1] &= (PIND >> 1) | 0b10111111;
 #endif
 
 //--- type L ---------------
@@ -193,8 +197,8 @@ void pollController(byte *state_buf)
 void buttonsScan()
 {
 
-  byte state1[2] = {0xFF, 0xFF};
-  byte state2[2] = {0xFF, 0xFF};
+  uint8_t state1[2] = {0xFF, 0xFF};
+  uint8_t state2[2] = {0xFF, 0xFF};
 
   pollController(state1);
   _delay_us(DEBOUNCE_DELAY_us);
@@ -211,7 +215,7 @@ void wiimoteQuery()
 {
 
   wdt_reset();
-  byte state[2] = {0xFF, 0xFF};
+  uint8_t state[2] = {0xFF, 0xFF};
 
   if (!config_mode)
   {
@@ -256,7 +260,7 @@ void wiimoteQuery()
 /***********************************************************
  * MAIN
 ************************************************************/
-void setup()
+int main(void)
 {
 
   wdt_disable(); // disable watchdog reset
@@ -264,59 +268,59 @@ void setup()
   WME.init(wiimoteQuery);
   wdt_enable(WDTO_2S); //enable watchdog
   wdt_reset();
-}
 
-void loop()
-{
-
-  buttonsScan();
-
-  // настройка турбо кнопок
-  if (config_mode)
+  while (1)
   {
-    if (!(buttons_state[1] & nADD_TURBO_1))
-    {
-      // добавление турбо
-      turbo_mask[0] |= 0x22 & ~(buttons_state[0]);
-      turbo_mask[1] |= 0x78 & ~(buttons_state[1]);
-    }
-    else if (!(buttons_state[0] & nREMOVE_TURBO_0))
-    {
-      // удаление турбо
-      turbo_mask[0] &= 0x22 & buttons_state[0];
-      turbo_mask[1] &= 0x78 & buttons_state[1];
-    }
 
-    // сброс настроек турбо кнопок
-    if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
-    {
-      turbo_mask[0] = 0x00;
-      turbo_mask[1] = 0x00;
-    }
-    // выход из режима настройки турбо кнопок
-    if (buttons_state[0] == EXIT_CONFIG_0 && buttons_state[1] == EXIT_CONFIG_1)
-    {
-      config_mode = false;
-    }
-  }
-  else
-  {
-    // вход в режим настройки турбо кнопок
-    if (buttons_state[0] == ENTER_CONFIG_0 && buttons_state[1] == ENTER_CONFIG_1)
-    {
-      config_push_time++;
+    buttonsScan();
 
-      if (config_push_time > CONFIG_MODE_DELAY)
+    // настройка турбо кнопок
+    if (config_mode)
+    {
+      if (!(buttons_state[1] & nADD_TURBO_1))
       {
-        config_mode = true;
+        // добавление турбо
+        turbo_mask[0] |= 0x22 & ~(buttons_state[0]);
+        turbo_mask[1] |= 0x78 & ~(buttons_state[1]);
       }
-      _delay_ms(1000);
+      else if (!(buttons_state[0] & nREMOVE_TURBO_0))
+      {
+        // удаление турбо
+        turbo_mask[0] &= 0x22 & buttons_state[0];
+        turbo_mask[1] &= 0x78 & buttons_state[1];
+      }
+
+      // сброс настроек турбо кнопок
+      if (buttons_state[0] == RESET_CONFIG_0 && buttons_state[1] == RESET_CONFIG_1)
+      {
+        turbo_mask[0] = 0x00;
+        turbo_mask[1] = 0x00;
+      }
+      // выход из режима настройки турбо кнопок
+      if (buttons_state[0] == EXIT_CONFIG_0 && buttons_state[1] == EXIT_CONFIG_1)
+      {
+        config_mode = false;
+      }
     }
     else
     {
-      config_push_time = 0;
-    }
-  }
+      // вход в режим настройки турбо кнопок
+      if (buttons_state[0] == ENTER_CONFIG_0 && buttons_state[1] == ENTER_CONFIG_1)
+      {
+        config_push_time++;
 
-  _delay_ms(BUTTONS_SCAN_DELAY_ms);
+        if (config_push_time > CONFIG_MODE_DELAY)
+        {
+          config_mode = true;
+        }
+        _delay_ms(1000);
+      }
+      else
+      {
+        config_push_time = 0;
+      }
+    }
+
+    _delay_ms(BUTTONS_SCAN_DELAY_ms);
+  }
 }
