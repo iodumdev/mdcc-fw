@@ -16,8 +16,8 @@
 #define SNES_TYPE 0x03
 
 // режим установки турбо кнопок
-#define CONFIG_MODE_DELAY 4 //sec;
-#define TURBO_INTERVAL 67 // msec
+#define CONFIG_MODE_DELAY_s 4 //sec;
+#define TURBO_INTERVAL_ms 67 // msec
 
 // состояния кнопок для переключения режимов
 #define ENTER_CONFIG_0 0xED

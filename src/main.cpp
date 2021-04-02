@@ -222,7 +222,7 @@ void wiimoteQuery()
     state[0] = buttons_state[0];
     state[1] = buttons_state[1];
 
-    if (millis() - last_turbo_push >= TURBO_INTERVAL)
+    if (millis() - last_turbo_push >= TURBO_INTERVAL_ms)
     {
       state[0] |= turbo_mask[0];
       state[1] |= turbo_mask[1];
@@ -309,7 +309,7 @@ int main(void)
       {
         config_push_time++;
 
-        if (config_push_time > CONFIG_MODE_DELAY)
+        if (config_push_time > CONFIG_MODE_DELAY_s)
         {
           config_mode = true;
         }
