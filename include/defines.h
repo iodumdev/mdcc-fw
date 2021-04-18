@@ -60,4 +60,4 @@
 #define BUTTONS_SCAN_DELAY_ms 2 // миллисекунды
 
 // задержка для устранения дребезга кнопок
-#define DEBOUNCE_DELAY_us 3 //микросекунды
+#define DEBOUNCE_DELAY_us 1 //микросекунды

@@ -1,3 +1,7 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/power.h>
+#include <util/atomic.h>
 #include "millis.h"
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
@@ -30,7 +34,8 @@ ISR(TIMER0_OVF_vect)
 
 	m += MILLIS_INC;
 	f += FRACT_INC;
-	if (f >= FRACT_MAX) {
+	if (f >= FRACT_MAX)
+	{
 		f -= FRACT_MAX;
 		m += 1;
 	}
@@ -38,6 +43,16 @@ ISR(TIMER0_OVF_vect)
 	timer0_fract = f;
 	timer0_millis = m;
 	timer0_overflow_count++;
+}
+
+void millis_init()
+{
+	// this needs to be called before setup() or some functions won't
+	// work there
+	sei();
+
+	TCCR0  |= 0x03;
+	TIMSK |= 0x01;
 }
 
 unsigned long millis()

@@ -17,6 +17,7 @@ extern "C" {
 //#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
 
 #include <WMExtention.h>
+#include <util/delay.h>
 #include <avr/wdt.h>
 #include <defines.h>
 
@@ -264,6 +265,7 @@ int main(void)
 {
 
   wdt_disable(); // disable watchdog reset
+  millis_init();
   gamepadInit();
   WME.init(wiimoteQuery);
   wdt_enable(WDTO_2S); //enable watchdog
