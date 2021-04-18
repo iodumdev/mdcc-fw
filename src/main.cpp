@@ -45,7 +45,7 @@ int gamepadInit()
   DDRC &= 0b11110010;
   PORTC |= 0b00001101;
   DDRD &= 0b00011000;
-  PORTD |= 0b1100111;
+  PORTD |= 0b11100111;
   /*
   pinMode(BTN_UP, INPUT_PULLUP);
   pinMode(BTN_DOWN, INPUT_PULLUP);
