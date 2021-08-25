@@ -24,12 +24,11 @@
   e-mail   :  iodumdevices@gmail.com
 */
 
-//#include <Arduino.h> // используется только функция millis()
 extern "C" {
 #include <millis.h>
 }
 
-//#define TYPE_L // !!! ТИП ПЛАТЫ. Закомментить для type S/C!!!
+//#define TYPE_L
 
 #include <WMExtention.h>
 #include <util/delay.h>
@@ -37,8 +36,6 @@ extern "C" {
 #include <defines.h>
 
 // состояние кнопок
-//byte buttons_state_mini[8] = {0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0xFF, 0xFF};
-//byte buttons_state_wii[6] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF};
 uint8_t controller_report[8] = {0x5F, 0xDF, 0x8F, 0x00, 0xFF, 0xFF, 0x00, 0x00};
 uint8_t buttons_state[2] = {0xFF, 0xFF};
 uint8_t turbo_mask[2] = {0x00, 0x00};
