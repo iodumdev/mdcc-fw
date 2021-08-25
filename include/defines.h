@@ -1,12 +1,25 @@
 /*
- * MEGA DRIVE CLASSIC CONTROLLER firmware
- * 
- * 
- * by IODUM
- * 
- * version 1.1.2
- *
-*/
+  Copyright (C) 2020-2021 Denis Radiontsev.  All rights reserved.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+  Contact information
+  -------------------
+  Denis Radiontsev
+  e-mail   :  iodumdevices@gmail.com
+ */
 
 //************ Адреса ******************
 #define CONSOLE_TYPE_REG 0xFE // W / 0x03 для SNES, 0x01 для WII
@@ -30,6 +43,7 @@
 #define nREMOVE_TURBO_0 0x40
 
 // порты подключения кнопок на плате type S/C
+/*
 #define BTN_MODE 14 //PC0
 #define BTN_UP 16   //PC2
 #define BTN_LEFT 17 //PC3
@@ -42,8 +56,10 @@
 #define BTN_Y 8     //PB0
 #define BTN_C 9     //PB1
 #define BTN_Z 10    //PB2
+*/
 
 // порты подключения пинов гейпада сеги (type L)
+/*
 #define UP_Z_BTN 3       //PD3
 #define DOWN_Y_BTN 4     //PD4
 #define LEFT_X_BTN 5     //PD5
@@ -51,6 +67,7 @@
 #define A_B_BTN 7        //PD7
 #define START_C_BTN 9    //PB1
 #define SELECT_PIN 8     //PB0
+*/
 
 // задержки для корректного чтения состояния кнопок (type L)
 #define SCAN_LOOP_DELAY_ms 17

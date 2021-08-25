@@ -1,13 +1,28 @@
 /*
- * MEGA DRIVE CLASSIC CONTROLLER firmware
- * 
- * 
- * by IODUM
- * 
- * version 2.0
- *
-*/
+  MEGA DRIVE CLASSIC CONTROLLER firmware
+  version 2.0
+  
+  Copyright (C) 2020-2021 Denis Radiontsev.  All rights reserved.
 
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+  Contact information
+  -------------------
+  Denis Radiontsev
+  e-mail   :  iodumdevices@gmail.com
+*/
 
 //#include <Arduino.h> // используется только функция millis()
 extern "C" {
@@ -47,20 +62,6 @@ int gamepadInit()
   PORTC |= 0b00001101;
   DDRD &= 0b00011000;
   PORTD |= 0b11100111;
-  /*
-  pinMode(BTN_UP, INPUT_PULLUP);
-  pinMode(BTN_DOWN, INPUT_PULLUP);
-  pinMode(BTN_LEFT, INPUT_PULLUP);
-  pinMode(BTN_RIGHT, INPUT_PULLUP);
-  pinMode(BTN_START, INPUT_PULLUP);
-  pinMode(BTN_MODE, INPUT_PULLUP);
-  pinMode(BTN_A, INPUT_PULLUP);
-  pinMode(BTN_B, INPUT_PULLUP);
-  pinMode(BTN_C, INPUT_PULLUP);
-  pinMode(BTN_X, INPUT_PULLUP);
-  pinMode(BTN_Y, INPUT_PULLUP);
-  pinMode(BTN_Z, INPUT_PULLUP);
-  */
 #endif
 
 //--- type L ---------------
@@ -71,17 +72,6 @@ int gamepadInit()
   DDRB &= 0b11111101;
   PORTB |= _BV(PB0);
 
-/*
-  pinMode(UP_Z_BTN, INPUT);
-  pinMode(DOWN_Y_BTN, INPUT);
-  pinMode(LEFT_X_BTN, INPUT);
-  pinMode(RIGHT_MODE_BTN, INPUT);
-  pinMode(A_B_BTN, INPUT);
-  pinMode(START_C_BTN, INPUT);
-  pinMode(SELECT_PIN, OUTPUT);
-
-  digitalWrite(SELECT_PIN, HIGH);
-*/
 #endif
 
   return 0;
@@ -144,16 +134,12 @@ void pollController(uint8_t *state_buf)
   {
     PORTB &= ~_BV(PB0);
     _delay_us(SCAN_STEP_DELAY_us);
-    //digitalWrite(SELECT_PIN, LOW);
-    //delayMicroseconds(SCAN_STEP_DELAY);
 
     if (i == 1)
       buf[0] = controllerPortRead();
 
     PORTB |= _BV(PB0);
     _delay_us(SCAN_STEP_DELAY_us);
-    //digitalWrite(SELECT_PIN, HIGH);
-    //delayMicroseconds(SCAN_STEP_DELAY);
 
     if (i == 1)
       buf[1] = controllerPortRead();
